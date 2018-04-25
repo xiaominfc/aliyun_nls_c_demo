@@ -91,6 +91,8 @@ make
 ~~~
 哈哈 就可以看到返回的结果了
 
+ps:音频需要8000采样率单声道的pcm数据 存成wav的格式 方便测试 这些都写死在程序里了,可以改
+
 # 感谢
 
 [libwsclient](https://github.com/payden/libwsclient)
