@@ -32,7 +32,7 @@
 *.dSYM/
 
 test
-test.c_back
+test.c_*
 libwsclient
 
 *.DS_Store
