@@ -4,7 +4,7 @@
 
 #  编译
 
-## 编译ws依赖(https://github.com/payden/libwsclient)[https://github.com/payden/libwsclient]
+## 编译ws依赖[https://github.com/payden/libwsclient](https://github.com/payden/libwsclient)
 
 ~~~
 git clone https://github.com/payden/libwsclient.git
@@ -93,7 +93,7 @@ make
 
 # 感谢
 
-(https://github.com/payden/libwsclient)[libwsclient]
-(https://github.com/kgabis/parson)[parson]
+[libwsclient](https://github.com/payden/libwsclient)
+[parson](https://github.com/kgabis/parson)
 
 
