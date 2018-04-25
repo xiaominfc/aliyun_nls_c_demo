@@ -5,7 +5,7 @@ OPENSSL_LIB=/usr/local/Cellar/openssl/1.0.2n/lib
 
 CC=gcc
 CFLAGS=-g -c -Wall 
-LDFLAGS=-L$(OPENSSL_LIB) -L./libwsclient/.libs  -lssl -lcrypto -lwsclient
+LDFLAGS=-L$(OPENSSL_LIB) -L./libwsclient/.libs  -lwsclient -lssl -lcrypto -lpthread  
 INCLUDE=-I. -I$(OPENSSL_INCLUDE) -I./libwsclient
 SOURCES=client.c autils.c parson.c test.c
 OBJECTS=$(SOURCES:.c=.o)
@@ -15,7 +15,7 @@ EXECUTABLE=test
 all: $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDE)  $< -o $@ 
