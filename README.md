@@ -7,6 +7,7 @@
 ## 编译ws依赖[https://github.com/payden/libwsclient](https://github.com/payden/libwsclient)
 
 ~~~
+cd {aliyun_nls_c_demo源码的路径}
 git clone https://github.com/payden/libwsclient.git
 cd libwsclient
 ~~~
