@@ -8,6 +8,9 @@ pthread_t test_thread;
 #define TEST_WAV_PATH "./test.wav"
 #endif
 
+//static char *AUTHBODY = "{\"app_key\":\"nls-service-realtime-8k\",\"format\":\"pcm\",\"response_mode\":\"streaming\",\"sample_rate\":8000}";
+static char *AUTHBODY = "{\"app_key\":\"nls-service-realtime-8k\",\"format\":\"pcm\",\"response_mode\":\"streaming\",\"sample_rate\":8000,\"vocabulary_id\":\"b53bfe5a8b214b3c965ccecb8a0cf828\"}";
+
 static int do_write = 0;
 static int pack_count = 0;
 static long start_time = 0;
@@ -26,9 +29,8 @@ void work_write_thread(void *arg) {
 }
 
 static int  buildDigestContent(char *showTime,char *content) {
-	char *authBody = "{\"app_key\":\"nls-service-realtime-8k\",\"format\":\"pcm\",\"response_mode\":\"streaming\",\"sample_rate\":8000}";
 	unsigned char digest[MD5_DIGEST_LENGTH];
-	MD5((unsigned char*)authBody, strlen(authBody), (unsigned char*)&digest);
+	MD5((unsigned char*)AUTHBODY, strlen(AUTHBODY), (unsigned char*)&digest);
 	return sprintf(content,"POST\napplication/json\n%s\napplication/json\n%s",autils_base64_encode(digest,MD5_DIGEST_LENGTH),showTime);
 }
 
@@ -45,9 +47,11 @@ int buildAuthContent(NLSClient *client,char *result)
 	unsigned int digest_len;
 	HMAC(EVP_sha1(), app_key, strlen(app_key), (unsigned char*)content, contentLen, digest, &digest_len);
 	char *auth = autils_base64_encode(digest,digest_len);
-	char *target= "{\"context\":{\"auth\":{\"headers\":{\"Authorization\":\"Dataplus %s:%s\",\"accept\":\"application/json\",\"content_type\":\"application/json\",\"date\":\"%s\"},\"method\":\"POST\"}},\"enableCompress\":false,\"request\":{\"app_key\":\"nls-service-realtime-8k\",\"format\":\"pcm\",\"response_mode\":\"streaming\",\"sample_rate\":8000},\"sdkInfo\":{\"sdk_type\":\"java\",\"version\":\"2.0.0\"},\"version\":\"2.0\"}";
-	int result_len = sprintf(result,target,app_id,auth,buf);	
-	free(digest);
+	char *target= "{\"context\":{\"auth\":{\"headers\":{\"Authorization\":\"Dataplus %s:%s\",\"accept\":\"application/json\",\"content_type\":\"application/json\",\"date\":\"%s\"},\"method\":\"POST\"}},\"enableCompress\":false,\"request\":%s,\"sdkInfo\":{\"sdk_type\":\"java\",\"version\":\"2.0.0\"},\"version\":\"2.0\"}";
+	int result_len = sprintf(result,target,app_id,auth,buf, AUTHBODY);	
+	
+    printf("%s\n", result);
+    free(digest);
 	return result_len;
 }
 
