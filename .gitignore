@@ -35,4 +35,8 @@ test
 test.c_*
 libwsclient
 
+local_test.c
+
+.vscode
+
 *.DS_Store
