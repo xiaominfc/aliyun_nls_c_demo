@@ -19,6 +19,8 @@
 #define autils_autils_h
 
 #include "parson.h"
+#include <unistd.h>
+#include <uuid/uuid.h>
 
 
 typedef struct _DataPack 
@@ -36,6 +38,7 @@ void freePack(DataPack* pack);
 
 int json_get_integer(JSON_Value *json_value,char *key);
 int json_dotget_integer(JSON_Value *json_value,char *key);
+char* json_dotget_string(JSON_Value *json_value,char *key);
 
 // sleep us
 void sys_usleep(unsigned int us);
@@ -49,5 +52,9 @@ int buildGMTTime(char *showTime);
 char* autils_base64_encode(const unsigned char *input, int length);
 
 long current_time();
+
+void build_uuid(char *uuid_str);
+
+char *current_task_id();
 
 #endif

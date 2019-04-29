@@ -31,10 +31,13 @@ typedef struct _NLSClient
 {
     wsclient *ws_client;
     NLSState state;
-    char* app_id;
+    char* access_key_id;
+    char* access_key_secret;
     char* app_key;
     DataPack* writePack;
     DataPack* controlPack;
+    char* token;
+    int type;
 }NLSClient;
 
 void nlsUrlConnect(const char * url,NLSClient *nls_client);

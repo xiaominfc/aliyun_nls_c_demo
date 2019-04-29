@@ -127,6 +127,11 @@ int json_dotget_integer(JSON_Value *json_value,char *key) {
     return (int)json_object_dotget_number(json_value_get_object(json_value),key);   
 }
 
+char* json_dotget_string(JSON_Value *json_value,char *key) {
+    return json_object_dotget_string(json_value_get_object(json_value),key);
+}
+
+
 long current_time(){
     struct timeval tv;
     gettimeofday(&tv,NULL);
@@ -134,3 +139,51 @@ long current_time(){
 }
 
 
+void build_uuid(char *uuid_str){
+    uuid_t uuid_bind;
+    uuid_generate_random(uuid_bind);
+
+// #ifdef capitaluuid
+//     /* Produces a UUID string at uuid consisting of capital letters. */
+//     uuid_unparse_upper(uuid_bind, uuid_str);
+// #elif lowercaseuuid
+//     /* Produces a UUID string at uuid consisting of lower-case letters. */
+//     uuid_unparse_lower(uuid_bind, uuid_str);
+// #else
+//     /*
+//      * Produces a UUID string at uuid consisting of letters
+//      * whose case depends on the system's locale.
+//      */
+//     uuid_unparse(uuid_bind, uuid_str);
+// #endif
+    uuid_unparse_lower(uuid_bind, uuid_str);
+}
+
+
+void remove_str_char(char *str,char key,int len) {
+    int index = 0;
+    int position = 0;
+    while(index < len) {
+        if(str[index] != key) {
+            str[position] = str[index];
+            position ++ ;
+            index ++;
+        }else {
+            index ++;
+        }
+        
+    }
+    while(position < len) {
+        str[position] = 0;
+        position ++ ;
+    }
+}
+
+char *current_task_id(){
+    int maxLen = 37;
+    char *uuid_str = malloc(maxLen);
+    build_uuid(uuid_str);
+    //printf("uuid:%s\n",uuid_str);
+    remove_str_char(uuid_str,'-',maxLen);
+    return uuid_str;
+}

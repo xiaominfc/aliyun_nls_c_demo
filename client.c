@@ -34,21 +34,40 @@ static int  buildDigestContent(char *showTime,char *content) {
 	return sprintf(content,"POST\napplication/json\n%s\napplication/json\n%s",autils_base64_encode(digest,MD5_DIGEST_LENGTH),showTime);
 }
 
+int buildAuthContent2(NLSClient *client,char *result) {
+
+	char *message_id = current_task_id();
+	char *uuid = current_task_id();
+	char *appkey = client->app_key;
+	//printf("task_id:%s\n",uuid);
+	char *target= "{\"payload\":{\"sample_rate\":8000,\"format\":\"pcm\",\"enable_intermediate_result\":true,\"enable_inverse_text_normalization\":true,\"enable_punctuation_prediction\":true},\"context\":{\"sdk\":{\"name\":\"nls-sdk-java\",\"version\":\"2.0.2\"}},\"header\":{\"namespace\":\"SpeechTranscriber\",\"name\":\"StartTranscription\",\"message_id\":\"%s\",\"appkey\":\"%s\",\"task_id\":\"%s\"}}";
+	// int len =  strlen(target);
+	// memcpy(result,target,len);
+	int result_len = sprintf(result,target,message_id,appkey,uuid);	
+	//printf("header:%s\n",result);
+	//free(uuid);
+	return result_len;
+}
+
 
 int buildAuthContent(NLSClient *client,char *result) 
 {
+
+	if(client->type == 2) {
+		return buildAuthContent2(client,result);
+	}
 	char buf[100];  
 	buildGMTTime(buf);
 	char *content = malloc(1024);
 	int contentLen = buildDigestContent(buf,content);
-	char *app_key = client->app_key;
-	char *app_id = client->app_id;
+	char *access_key_secret = client->access_key_secret;
+	char *access_key_id = client->access_key_id;
 	unsigned char* digest = (unsigned char*)malloc(EVP_MAX_MD_SIZE);
-	unsigned int digest_len;
-	HMAC(EVP_sha1(), app_key, strlen(app_key), (unsigned char*)content, contentLen, digest, &digest_len);
+	unsigned int digest_len; 
+	HMAC(EVP_sha1(), access_key_secret, strlen(access_key_secret), (unsigned char*)content, contentLen, digest, &digest_len);
 	char *auth = autils_base64_encode(digest,digest_len);
 	char *target= "{\"context\":{\"auth\":{\"headers\":{\"Authorization\":\"Dataplus %s:%s\",\"accept\":\"application/json\",\"content_type\":\"application/json\",\"date\":\"%s\"},\"method\":\"POST\"}},\"enableCompress\":false,\"request\":%s,\"sdkInfo\":{\"sdk_type\":\"java\",\"version\":\"2.0.0\"},\"version\":\"2.0\"}";
-	int result_len = sprintf(result,target,app_id,auth,buf, AUTHBODY);	
+	int result_len = sprintf(result,target,access_key_id,auth,buf, AUTHBODY);	
 	
     printf("%s\n", result);
     free(digest);
@@ -126,9 +145,40 @@ int onnlserror(wsclient *c, wsclient_error *err) {
     return 0;
 }
 
-int onnlsmessage(wsclient *c, wsclient_message *msg) {
-    fprintf(stderr, "onmessage: (%llu): %s\n", msg->payload_len, msg->payload);
+
+int onnlsmessage2(wsclient *c, wsclient_message *msg){
+
 	NLSClient *nls_client = (NLSClient *)c->user_data;
+	JSON_Value *json = json_parse_string(msg->payload);
+	int code = json_dotget_integer(json,"header.status");
+	if(code != 20000000) {
+		printf("%s\n", msg->payload);
+		return 1;
+	}
+	if(nls_client->state == HANDSHAKED) {
+		nls_client->state = TRANSFERRING;
+		#ifdef DEBUG_TEST
+		pthread_create(&test_thread, NULL, test_work, nls_client);
+		#endif
+	}else if(nls_client->state == TRANSFERRING) {
+		int status_code = json_dotget_integer(json,"header.status");
+		printf("%s:%d\n", "nls status_code:", status_code);
+		printf("%s:%s\n", "nls text:", json_dotget_string(json,"payload.result"));
+		if(status_code == 0) {
+			#ifdef DEBUG_TEST
+			printf("%s:%d\n","send time", current_time() - start_time);	
+			#endif
+		}
+	}
+    return 0;
+}
+
+int onnlsmessage(wsclient *c, wsclient_message *msg) {
+    //fprintf(stderr, "onmessage: (%llu): %s\n", msg->payload_len, msg->payload);
+	NLSClient *nls_client = (NLSClient *)c->user_data;
+	if(nls_client->type == 2) {
+		return onnlsmessage2(c,msg);
+	}
 	JSON_Value *json = json_parse_string(msg->payload);
 	int code = json_get_integer(json,"status_code");
 	if(code != 200) {
@@ -143,6 +193,7 @@ int onnlsmessage(wsclient *c, wsclient_message *msg) {
 	}else if(nls_client->state == TRANSFERRING) {
 		int status_code = json_dotget_integer(json,"result.status_code");
 		printf("%s:%d\n", "nls status_code:", status_code);
+		printf("%s:%s\n", "nls text:", json_dotget_string(json,"result.text"));
 		if(status_code == 0) {
 			#ifdef DEBUG_TEST
 			printf("%s:%d\n","send time", current_time() - start_time);	
@@ -162,7 +213,8 @@ int onnlsopen(wsclient *c) {
 
 void nlsConnect(const char *host,const int port,const char* subpath,NLSClient *nls_client) {
 	char * tmp_url = malloc(1024);
-	int end = sprintf(tmp_url,"wss://%s:%d/%s",host,port,subpath);
+	//int end = sprintf(tmp_url,"wss://%s:%d/%s",host,port,subpath);
+	int end = sprintf(tmp_url,"wss://%s/%s",host,subpath);
 	tmp_url[end] = 0;
 	nlsUrlConnect(tmp_url,nls_client);
 	free(tmp_url);
@@ -172,6 +224,12 @@ void nlsConnect(const char *host,const int port,const char* subpath,NLSClient *n
 void nlsUrlConnect(const char * url,NLSClient *nls_client) {
 	wsclient *client = libwsclient_new(url);
 	client->user_data = nls_client;
+	if(nls_client->type == 2) {
+		client->have_token = 1;
+		client->token = nls_client->token;
+	}else {
+		client->have_token = 0;
+	}
 	libwsclient_onopen(client, &onnlsopen);
     libwsclient_onmessage(client, &onnlsmessage);
     libwsclient_onerror(client, &onnlserror);
