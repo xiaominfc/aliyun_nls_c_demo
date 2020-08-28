@@ -627,13 +627,10 @@ void *libwsclient_handshake_thread(void *ptr) {
 		snprintf(request_host, 255, "%s", host);
 	}
 	if(client->have_token) {
-	    snprintf(request_headers, 1024, "GET %s HTTP/1.1\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nHost: %s\r\nSec-WebSocket-Key: %s\r\nSec-WebSocket-Version: 13\r\nX-NLS-Token: %s\r\n\r\n", path, request_host, websocket_key,client->token);	
+		snprintf(request_headers, 1024, "GET %s HTTP/1.1\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nHost: %s\r\nSec-WebSocket-Key: %s\r\nSec-WebSocket-Version: 13\r\nX-NLS-Token: %s\r\n\r\n", path, request_host, websocket_key,client->token);	
 	}else {
 		snprintf(request_headers, 1024, "GET %s HTTP/1.1\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nHost: %s\r\nSec-WebSocket-Key: %s\r\nSec-WebSocket-Version: 13\r\n\r\n", path, request_host, websocket_key);
 	}
-	
-
-	//printf(request_headers);
 	n = _libwsclient_write(client, request_headers, strlen(request_headers));
 	z = 0;
 	memset(recv_buf, 0, 1024);
@@ -643,7 +640,6 @@ void *libwsclient_handshake_thread(void *ptr) {
 		n = _libwsclient_read(client, recv_buf + z, 1023 - z);
 		z += n;
 	} while((z < 4 || strstr(recv_buf, "\r\n\r\n") == NULL) && n > 0);
-
 	if(n == 0) {
 		if(client->onerror) {
 			err = libwsclient_new_error(WS_HANDSHAKE_REMOTE_CLOSED_ERR);

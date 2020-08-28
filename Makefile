@@ -13,7 +13,7 @@ SRC_DIR=./src
 
 SOURCES=$(shell find $(SRC_DIR) -name "*.c")
 OBJECTS=$(SOURCES:.c=.o)
-SHARE_LIB=libaliyunnls.so
+SHARE_LIB=libworkasr.so
 EXECUTABLE=test
 LIB_OUT=lib
 
@@ -24,7 +24,7 @@ cmd:
 	mkdir -p $(LIB_OUT)
 
 $(EXECUTABLE): $(SHARE_LIB)
-	$(CC) -L$(LIB_OUT) -laliyunnls  $(INCLUDE)  $(EXECUTABLE).c  -o $@ $(LDFLAGS)
+	$(CC) -L$(LIB_OUT) -lworkasr  $(INCLUDE)  $(EXECUTABLE).c  -o $@ $(LDFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDE)  $< -o $@

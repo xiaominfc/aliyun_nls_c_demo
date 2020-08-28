@@ -40,3 +40,4 @@ local_test.c
 .vscode
 
 *.DS_Store
+*.swp
