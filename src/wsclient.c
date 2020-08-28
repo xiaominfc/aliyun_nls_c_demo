@@ -442,13 +442,10 @@ void *libwsclient_helper_socket_thread(void *ptr) {
 
 	for(;;) { //TODO: some way to cleanly break this loop
 		len = sizeof(remote);
-
 		if((remote_sock = accept(c->helper_sock, (struct sockaddr *)&remote, &len)) == -1) {
 			continue;
 		}
-
 		pthread_mutex_lock(&c->send_lock);
-
 		n2 = 0;
 		n = 1;
 		flags = WS_FRAGMENT_START;
@@ -720,7 +717,7 @@ void *libwsclient_handshake_thread(void *ptr) {
 			}
 		}
 	}
-	if(!flags & REQUEST_HAS_UPGRADE) {
+	if((!flags) & REQUEST_HAS_UPGRADE) {
 		if(client->onerror) {
 			err = libwsclient_new_error(WS_HANDSHAKE_NO_UPGRADE_ERR);
 			client->onerror(client, err);
@@ -729,7 +726,7 @@ void *libwsclient_handshake_thread(void *ptr) {
 		}
 		return NULL;
 	}
-	if(!flags & REQUEST_HAS_CONNECTION) {
+	if((!flags) & REQUEST_HAS_CONNECTION) {
 		if(client->onerror) {
 			err = libwsclient_new_error(WS_HANDSHAKE_NO_CONNECTION_ERR);
 			client->onerror(client, err);
@@ -738,7 +735,7 @@ void *libwsclient_handshake_thread(void *ptr) {
 		}
 		return NULL;
 	}
-	if(!flags & REQUEST_VALID_ACCEPT) {
+	if((!flags) & REQUEST_VALID_ACCEPT) {
 		if(client->onerror) {
 			err = libwsclient_new_error(WS_HANDSHAKE_BAD_ACCEPT_ERR);
 			client->onerror(client, err);

@@ -8,8 +8,6 @@
 #include "autils.h"
 #include "wsclient.h"
 
-
-
 #define WS_TEXT_FRAGMENT 0x81
 #define WS_BINARY_FRAGMENT 0x82
 
