@@ -30,7 +30,7 @@ $(EXECUTABLE): $(SHARE_LIB)
 	$(CC) $(CFLAGS) $(INCLUDE)  $< -o $@
 
 $(SHARE_LIB): $(OBJECTS)
-	-$(CC)  $(INCLUDE) $(LDFLAGS)  -fPIC -shared  $(OBJECTS) -o $(LIB_OUT)/$(SHARE_LIB)
+	$(CC)  $(INCLUDE) $(LDFLAGS)  -fPIC -shared  $(OBJECTS) -o $(LIB_OUT)/$(SHARE_LIB)
 
 
 clean:
