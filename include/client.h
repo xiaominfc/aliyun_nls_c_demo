@@ -40,8 +40,13 @@ typedef struct _NLSClient
 	char* app_key;
 	DataPack* writePack;
 	DataPack* controlPack;
+	int (*onconnected)(struct _NLSClient *);
+	int (*onclose)(struct _NLSClient *);
+	int (*onerror)(struct _NLSClient *, wsclient_error *err);
+	int (*onmessage)(struct _NLSClient *, wsclient_message *msg);
 	char* token;
 	int type;
+	void *user_data;
 }NLSClient;
 
 void nlsUrlConnect(const char * url,NLSClient *nls_client);
@@ -49,4 +54,7 @@ void nlsConnect(const char *host,const int port,const char* subpath,NLSClient *n
 void addPackDataForClient(NLSClient *client, char* buffer, int len,bool autosend);
 int buildAuthContent(NLSClient *client,char *result);
 void clientClose(NLSClient* client);
+
+void nls_set_onconnected(NLSClient *client, int (*cb)(struct _NLSClient *c));
+void nls_set_onmessage(NLSClient *client, int (*cb)(struct _NLSClient *c, wsclient_message *msg));
 #endif

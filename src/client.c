@@ -59,7 +59,7 @@ int buildAuthContent(NLSClient *client,char *result)
 	char *auth = autils_base64_encode(digest,digest_len);
 	char *target= "{\"context\":{\"auth\":{\"headers\":{\"Authorization\":\"Dataplus %s:%s\",\"accept\":\"application/json\",\"content_type\":\"application/json\",\"date\":\"%s\"},\"method\":\"POST\"}},\"enableCompress\":false,\"request\":%s,\"sdkInfo\":{\"sdk_type\":\"java\",\"version\":\"2.0.0\"},\"version\":\"2.0\"}";
 	int result_len = sprintf(result,target,access_key_id,auth,buf, AUTHBODY);
-	printf("%s\n", result);
+	//printf("%s\n", result);
 	free(digest);
 	free(content);
 	return result_len;
@@ -213,7 +213,7 @@ int onnlserror(wsclient *c, wsclient_error *err) {
 
 //for new aliyun nls
 int onnlsmessage2(wsclient *c, wsclient_message *msg){
-	printf("%s\n", msg->payload);
+	//printf("%s\n", msg->payload);
 	NLSClient *nls_client = (NLSClient *)c->user_data;
 	JSON_Value *json = json_parse_string(msg->payload);
 	int code = json_dotget_integer(json,"header.status");
@@ -223,13 +223,19 @@ int onnlsmessage2(wsclient *c, wsclient_message *msg){
 	}
 	if(nls_client->state == HANDSHAKED) {
 		nls_client->state = TRANSFERRING;
+		if(nls_client->onconnected){
+			nls_client->onconnected(nls_client);
+		}
 		#ifdef DEBUG_TEST
 		pthread_create(&test_thread, NULL, test_work, nls_client);
 		#endif
 	}else if(nls_client->state == TRANSFERRING) {
 		int status_code = json_dotget_integer(json,"header.status");
-		printf("%s:%d\n", "nls status_code:", status_code);
-		printf("%s:%s\n", "nls text:", json_dotget_string(json,"payload.result"));
+		// printf("%s:%d\n", "nls status_code:", status_code);
+		// printf("%s:%s\n", "nls text:", json_dotget_string(json,"payload.result"));
+		if(nls_client->onmessage){
+			nls_client->onmessage(nls_client,msg);
+		}
 		if(status_code == 0) {
 			#ifdef DEBUG_TEST
 			printf("%s:%ld\n","send time", current_time() - start_time);
@@ -272,17 +278,24 @@ int onmessage_aliyun(wsclient *c, wsclient_message *msg) {
 }
 
 int onmessage_othernls(wsclient *c, wsclient_message *msg) {
-	printf("%s\n",msg->payload);
+	//printf("%s\n",msg->payload);
+	NLSClient *nls_client = (NLSClient *)c->user_data;
+	if(nls_client->onmessage) {
+		nls_client->onmessage(nls_client,msg);
+	}
 }
 
 int onnlsopen(wsclient *c) {
-	fprintf(stderr, "onnlsopen called: %d\n", c->sockfd);
 	NLSClient *nls_client = (NLSClient *)c->user_data;
+	printf("onnlsopen called:%d for type:%d\n", c->sockfd,nls_client->type);
 	if(nls_client->type <= ALIYUN_NEW) {
 		nls_client->state = CONNECTED;
 		auth_nls(nls_client);
 	}else{
 		nls_client->state = TRANSFERRING;
+		if(nls_client->onconnected){
+			nls_client->onconnected(nls_client);
+		}
 		#ifdef DEBUG_TEST
 		pthread_create(&test_thread, NULL, test_work, nls_client);
 		#endif
@@ -332,6 +345,14 @@ void nlsUrlConnect(const char * url,NLSClient *nls_client) {
 void clientClose(NLSClient* client){
 	libwsclient_close(client->ws_client);
 	client->state = CLOSED;
+}
+
+void nls_set_onconnected(NLSClient *client, int (*cb)(struct _NLSClient *c)){
+	client->onconnected = cb;
+}
+
+void nls_set_onmessage(NLSClient *client, int (*cb)(struct _NLSClient *c, wsclient_message *msg)){
+	client->onmessage = cb;
 }
 
 
