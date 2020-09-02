@@ -139,6 +139,13 @@ int libwsclient_helper_socket(wsclient *c, const char *path);
 void *libwsclient_helper_socket_thread(void *ptr);
 int libwsclient_send_fragment(wsclient *client, char *strdata, int len, int flags);
 
+void libwsclient_onclose(wsclient *client, int (*cb)(wsclient *c));
+
+void libwsclient_onopen(wsclient *client, int (*cb)(wsclient *c));
+void libwsclient_onmessage(wsclient *client, int (*cb)(wsclient *c, wsclient_message *msg));
+
+void libwsclient_onerror(wsclient *client, int (*cb)(wsclient *c, wsclient_error *err));
+
 
 int libwsclient_flags; //global flags variable
 

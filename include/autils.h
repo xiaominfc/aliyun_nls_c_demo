@@ -45,7 +45,7 @@ void sys_usleep(unsigned int us);
 // sleep ms
 void sys_msleep(unsigned int ms);
 //
-static int cpy_to_target(char *source, int start, int len, char *target, int index);
+int cpy_to_target(char *source, int start, int len, char *target, int index);
 
 int buildGMTTime(char *showTime);
 

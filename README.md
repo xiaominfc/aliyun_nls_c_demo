@@ -6,6 +6,15 @@
 
 连接aliyun的NLS需要ssl 所以得先给自己的系统装上openssl
 
+### for centos 
+
+```
+yum install openssl-devel
+yum install uuid-devel
+yum install libuuid-devel
+```
+
+
 ## 测试
 
 修改 test.c 
