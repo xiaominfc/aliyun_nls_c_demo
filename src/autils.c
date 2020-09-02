@@ -120,15 +120,15 @@ char* autils_base64_encode(const unsigned char *input, int length)
 
 
 int json_get_integer(JSON_Value *json_value,char *key) {
-	return (int)json_object_get_number(json_value_get_object(json_value),key);
+	return (int)json_object_get_number(json_object(json_value),key);
 }
 
 int json_dotget_integer(JSON_Value *json_value,char *key) {
-	return (int)json_object_dotget_number(json_value_get_object(json_value),key);   
+	return (int)json_object_dotget_number(json_object(json_value),key);   
 }
 
 char* json_dotget_string(JSON_Value *json_value,char *key) {
-	return json_object_dotget_string(json_value_get_object(json_value),key);
+	return (char*)json_object_dotget_string(json_object(json_value),key);
 }
 
 

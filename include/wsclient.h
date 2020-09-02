@@ -9,6 +9,7 @@
 #include <stddef.h>
 
 #include "config.h"
+#include "autils.h"
 #ifdef HAVE_LIBSSL
 #include <openssl/ssl.h>
 #include <openssl/err.h>

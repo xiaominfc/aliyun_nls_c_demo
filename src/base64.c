@@ -42,7 +42,7 @@ void _base64_encode_triple(unsigned char triple[3], char result[4])
  * @return 1 on success, 0 otherwise
  */  
 int base64_encode(unsigned char *source, size_t sourcelen, char *target, size_t targetlen)
- {
+{
     /* check if the result will fit in the target buffer */
     if ((sourcelen+2)/3*4 > targetlen-1)
  return 0;
@@ -167,7 +167,8 @@ int _base64_decode_triple(char quadruple[4], unsigned char *result)
 size_t base64_decode(char *source, unsigned char *target, size_t targetlen)
  {
     char *src, *tmpptr;
-    char quadruple[4], tmpresult[3];
+    char quadruple[4];
+	unsigned char tmpresult[3];
     int i, tmplen = 3;
     size_t converted = 0;
 

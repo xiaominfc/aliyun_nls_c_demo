@@ -6,6 +6,7 @@
  */
 
 #include "token.h"
+#include "wsclient.h"
 #include <openssl/hmac.h>
 
 
@@ -23,9 +24,10 @@ int str2int(char *str,int len) {
 
 
 int get_token(char *akId,char *akSecrete,char *token){
-	char gmttime[100];  
+	char *gmttime = (char*)malloc(128);  
+	memset(gmttime,0,128);
 	buildGMTTime(gmttime);
-	char *content = malloc(1024);
+	char *content = (char*)malloc(1024);
 	memset(content,0,1024);
 	int content_len = sprintf(content,"POST\napplication/json\n1B2M2Y8AsgTpgAmY7PhCfg==\napplication/octet-stream;charset=utf-8\n%s\nx-acs-signature-method:HMAC-SHA1\nx-acs-signature-version:1.0\n/pop/2018-05-18/tokens",gmttime);
 	unsigned char* digest = (unsigned char*)malloc(EVP_MAX_MD_SIZE);
@@ -36,17 +38,18 @@ int get_token(char *akId,char *akSecrete,char *token){
 	char *header = malloc(1024);
 	memset(header,0, 1024);
 	int header_len = sprintf(header,"POST /pop/2018-05-18/tokens HTTP/1.1\r\nHost: nls-meta.cn-shanghai.aliyuncs.com\r\nAuthorization: acs %s:%s\r\nx-sdk-invoke-type: common\r\nAccept: application/json\r\nx-sdk-client: Java/2.0.0\r\nx-acs-signature-version: 1.0\r\nx-acs-signature-method: HMAC-SHA1\r\nDate: %s\r\nContent-MD5: 1B2M2Y8AsgTpgAmY7PhCfg==\r\nContent-Type: application/octet-stream;charset=utf-8\r\nContent-Length: 0\r\n\r\n",akId,auth,gmttime);
-
+	free(gmttime);
+	free(content);
 	free(digest);
 	free(auth);
-	int socketfd = libwsclient_open_connection("nls-meta.cn-shanghai.aliyuncs.com","80");
+	int socketfd = libwsclient_open_connection("nls-meta.cn-shanghai.aliyuncs.com","80");//connect tcp socket
 	if(socketfd > 0) {
 		send(socketfd, header, header_len, 0);
 		free(header);
 		unsigned int cache_size = 1024;
 		char *buf = malloc(cache_size);
-		char *response = malloc(2048);
-		memset(response,0,2048);
+		char *response = malloc(4096);
+		memset(response,0,4096);
 		int rcount = recv(socketfd, buf, cache_size, 0);
 		int size = 0;
 		while(rcount > 0) {
@@ -60,9 +63,10 @@ int get_token(char *akId,char *akSecrete,char *token){
 		close(socketfd);
 		free(buf);
 		int index = 1;
-		char *line = malloc(1024);
-		memset(line,0,1024);
-		int line_len = 0;
+		size_t line_max_size = 2048;
+		char *line = malloc(line_max_size);
+		memset(line,0,line_max_size);
+		unsigned int line_len = 0;
 		int status = 0;
 		int data_len = 0;
 		while(index < size){
@@ -73,7 +77,7 @@ int get_token(char *akId,char *akSecrete,char *token){
 					data_len = str2int(line+16,line_len - 16);
 					break; 
 				}
-				memset(line,0,256);
+				memset(line,0,line_max_size);
 				index = index + 1;
 				line_len = 0;
 			}else {
@@ -81,13 +85,14 @@ int get_token(char *akId,char *akSecrete,char *token){
 				line_len = line_len + 1;
 			}
 			index++;
-		} 
-	  //  printf("%s\n",response);
+		}
+		free(line);
 		if(status == 200) {
 			JSON_Value *json = json_parse_string(response + size - data_len);
 			char *token_id = json_dotget_string(json,"Token.Id");
 			int token_len = strlen(token_id);
 			memcpy(token, token_id, token_len);
+			json_value_free(json);
 			return token_len;
 		}
 	}else {

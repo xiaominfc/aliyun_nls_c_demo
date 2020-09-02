@@ -19,19 +19,25 @@ yum install libuuid-devel
 
 修改 test.c 
 
-~~~
+```
 #define KEYID "{your key_id}"
 #define KEYSECRET "{your key_secret}"
 #define APPKEY "{your app_key}"
+```
 
-~~~
+修改 include/client.h
+
+去掉注释
+```
+//#define DEBUG_TEST 
+```
 
 改成你申请的
 
-~~~
+```
 make
 ./test
-~~~
+```
 哈哈 就可以看到返回的结果了
 
 ps:音频需要8000采样率单声道的pcm数据 存成wav的格式 方便测试 这些都写死在程序里了,可以改

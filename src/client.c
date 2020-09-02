@@ -6,16 +6,17 @@
 #ifdef DEBUG_TEST
 pthread_t test_thread;
 #define TEST_WAV_PATH "./test.wav"
+static int do_write = 0;
+static int pack_count = 0;
+static long start_time = 0;
 #endif
 
 //static char *AUTHBODY = "{\"app_key\":\"nls-service-realtime-8k\",\"format\":\"pcm\",\"response_mode\":\"streaming\",\"sample_rate\":8000}";
 static char *AUTHBODY = "{\"app_key\":\"nls-service-realtime-8k\",\"format\":\"pcm\",\"response_mode\":\"streaming\",\"sample_rate\":8000,\"vocabulary_id\":\"b53bfe5a8b214b3c965ccecb8a0cf828\"}";
 
-static int do_write = 0;
-static int pack_count = 0;
-static long start_time = 0;
 
-void work_write_thread(void *arg) {
+
+void* work_write_thread(void *arg) {
 	NLSClient* client = (NLSClient*)arg;
 	while(1) {
 		if(client->state != TRANSFERRING) {
@@ -283,6 +284,7 @@ int onmessage_othernls(wsclient *c, wsclient_message *msg) {
 	if(nls_client->onmessage) {
 		nls_client->onmessage(nls_client,msg);
 	}
+	return 0;
 }
 
 int onnlsopen(wsclient *c) {
@@ -304,14 +306,13 @@ int onnlsopen(wsclient *c) {
 }
 
 void nlsConnect(const char *host,const int port,const char* subpath,NLSClient *nls_client) {
-	size_t TMP_SIZE = 1024;
-	char * tmp_url = (char*)malloc(TMP_SIZE);
-	memset(tmp_url,0,TMP_SIZE);
-	int end = 0;
+	size_t TMPURL_MAX_SIZE = 1024;
+	char * tmp_url = (char*)malloc(TMPURL_MAX_SIZE);
+	memset(tmp_url,0,TMPURL_MAX_SIZE);
 	if(port == 443) {
-		snprintf(tmp_url,TMP_SIZE,"wss://%s/%s",host,subpath);
+		snprintf(tmp_url,TMPURL_MAX_SIZE,"wss://%s/%s",host,subpath);
 	}else {
-		snprintf(tmp_url,TMP_SIZE,"ws://%s:%d/%s",host,port,subpath);
+		snprintf(tmp_url,TMPURL_MAX_SIZE,"ws://%s:%d/%s",host,port,subpath);
 	}
 	nlsUrlConnect(tmp_url,nls_client);
 	free(tmp_url);

@@ -53,6 +53,7 @@ void nlsUrlConnect(const char * url,NLSClient *nls_client);
 void nlsConnect(const char *host,const int port,const char* subpath,NLSClient *nls_client);
 void addPackDataForClient(NLSClient *client, char* buffer, int len,bool autosend);
 int buildAuthContent(NLSClient *client,char *result);
+int buildAuthContent2(NLSClient *client,char *result);
 void clientClose(NLSClient* client);
 
 void nls_set_onconnected(NLSClient *client, int (*cb)(struct _NLSClient *c));
