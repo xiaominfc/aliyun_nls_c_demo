@@ -5,7 +5,7 @@ OPENSSL_LIB=/usr/local/Cellar/openssl/1.0.2s/lib
 
 CC=gcc
 CFLAGS=-g -c -Wall -fPIC
-LDFLAGS=-L$(OPENSSL_LIB)  -lssl -lcrypto -lpthread  
+LDFLAGS=-L$(OPENSSL_LIB)  -lssl -lcrypto -lpthread -luuid
 INCLUDE=-I./include -I$(OPENSSL_INCLUDE) 
 #SOURCES=client.c autils.c token.c parson.c base64.c wsclient.c sha1.c test.c
 
