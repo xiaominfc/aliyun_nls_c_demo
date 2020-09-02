@@ -523,9 +523,11 @@ void *libwsclient_handshake_thread(void *ptr) {
 	const char *UUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 	char pre_encode[256];
 	unsigned char sha1bytes[20];
-	char expected_base64[512];
+	//char expected_base64[512];
+	char *expected_base64;
 	char request_headers[1024];
-	char websocket_key[256];
+	//char websocket_key[256];
+	char *websocket_key;
 	unsigned char key_nonce[16];
 	char scheme[10];
 	char host[255];
@@ -615,7 +617,8 @@ void *libwsclient_handshake_thread(void *ptr) {
 	for(z=0;z<16;z++) {
 		key_nonce[z] = rand() & 0xff;
 	}
-	base64_encode(key_nonce, 16, websocket_key, 256);
+	//str_base64_encode(key_nonce, 16, websocket_key, 256);
+	websocket_key = autils_base64_encode(key_nonce, 16);
 	memset(request_headers, 0, 1024);
 
 	if(strcmp(port, "80") != 0) {
@@ -673,8 +676,9 @@ void *libwsclient_handshake_thread(void *ptr) {
 	snprintf(pre_encode, 256, "%08x%08x%08x%08x%08x", shactx.Message_Digest[0], shactx.Message_Digest[1], shactx.Message_Digest[2], shactx.Message_Digest[3], shactx.Message_Digest[4]);
 	for(z = 0; z < (strlen(pre_encode)/2);z++)
 		sscanf(pre_encode+(z*2), "%02hhx", sha1bytes+z);
-	memset(expected_base64, 0, 512);
-	base64_encode(sha1bytes, 20, expected_base64, 512);
+	//memset(expected_base64, 0, 512);
+	expected_base64 = autils_base64_encode(sha1bytes,20);
+	//str_base64_encode(sha1bytes, 20, expected_base64, 512);
 	for(tok = strtok(rcv, "\r\n"); tok != NULL; tok = strtok(NULL, "\r\n")) {
 		if(*tok == 'H' && *(tok+1) == 'T' && *(tok+2) == 'T' && *(tok+3) == 'P') {
 			p = strchr(tok, ' ');
@@ -738,7 +742,8 @@ void *libwsclient_handshake_thread(void *ptr) {
 		return NULL;
 	}
 
-
+	free(expected_base64);
+	free(websocket_key);
 	pthread_mutex_lock(&client->lock);
 	client->flags &= ~CLIENT_CONNECTING;
 	pthread_mutex_unlock(&client->lock);

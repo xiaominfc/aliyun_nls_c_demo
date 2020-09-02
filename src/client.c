@@ -6,7 +6,6 @@
 #ifdef DEBUG_TEST
 pthread_t test_thread;
 #define TEST_WAV_PATH "./test.wav"
-static int do_write = 0;
 static int pack_count = 0;
 static long start_time = 0;
 #endif
@@ -31,7 +30,6 @@ void* work_write_thread(void *arg) {
 		}
 		//sys_msleep(20);
 	}
-	
 }
 
 static int  buildDigestContent(char *showTime,char *content) {
@@ -168,7 +166,7 @@ void addPackDataForClient(NLSClient *client, char* buffer, int len,bool autosend
 
 
 #ifdef DEBUG_TEST
-static void test_work(void *arg) {
+void* test_work(void *arg) {
 	NLSClient* client = (NLSClient*)arg;
 	printf("%s\n", "start test_work");
 	int inFd = open(TEST_WAV_PATH,O_RDONLY,0);
@@ -194,6 +192,7 @@ static void test_work(void *arg) {
 	}
 
 	free(buffer);
+	//return NULL;
 }
 #endif
 
@@ -228,7 +227,7 @@ int onnlsmessage2(wsclient *c, wsclient_message *msg){
 			nls_client->onconnected(nls_client);
 		}
 		#ifdef DEBUG_TEST
-		pthread_create(&test_thread, NULL, test_work, nls_client);
+		pthread_create(&test_thread, NULL, test_work, (void*)nls_client);
 		#endif
 	}else if(nls_client->state == TRANSFERRING) {
 		int status_code = json_dotget_integer(json,"header.status");
@@ -279,7 +278,9 @@ int onmessage_aliyun(wsclient *c, wsclient_message *msg) {
 }
 
 int onmessage_othernls(wsclient *c, wsclient_message *msg) {
-	//printf("%s\n",msg->payload);
+	#ifdef DEBUG_TEST
+	printf("%s\n",msg->payload);
+	#endif
 	NLSClient *nls_client = (NLSClient *)c->user_data;
 	if(nls_client->onmessage) {
 		nls_client->onmessage(nls_client,msg);
