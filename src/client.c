@@ -1,3 +1,21 @@
+/*
+ * =====================================================================================
+ *
+ *	   Filename:  client.c
+ *
+ *	Description:  
+ *
+ *		Version:  1.0
+ *		Created:  04/20/18 10:37:21
+ *	   Revision:  none
+ *	   Compiler:  gcc
+ *
+ *		 Author:  xiaominfc (xiaoyang) 
+ *		 Eamil:   xiaominfc@gmail.com
+ *   Organization:  武汉鸣鸾信息科技有限公司
+ *
+ * =====================================================================================
+ */
 #include <openssl/hmac.h>
 #include <openssl/md5.h>
 #include <fcntl.h>
@@ -12,8 +30,6 @@ static long start_time = 0;
 
 //static char *AUTHBODY = "{\"app_key\":\"nls-service-realtime-8k\",\"format\":\"pcm\",\"response_mode\":\"streaming\",\"sample_rate\":8000}";
 static char *AUTHBODY = "{\"app_key\":\"nls-service-realtime-8k\",\"format\":\"pcm\",\"response_mode\":\"streaming\",\"sample_rate\":8000,\"vocabulary_id\":\"b53bfe5a8b214b3c965ccecb8a0cf828\"}";
-
-
 
 void* work_write_thread(void *arg) {
 	NLSClient* client = (NLSClient*)arg;

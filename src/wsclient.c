@@ -755,15 +755,15 @@ void *libwsclient_handshake_thread(void *ptr) {
 
 //somewhat hackish stricmp
 int stricmp(const char *s1, const char *s2) {
-        register unsigned char c1, c2;
-        register unsigned char flipbit = ~(1 << 5);
-        do {
-                c1 = (unsigned char)*s1++ & flipbit;
-                c2 = (unsigned char)*s2++ & flipbit;
-                if(c1 == '\0')
-                        return c1 - c2;
-        } while(c1 == c2);
-        return c1 - c2;
+	register unsigned char c1, c2;
+	register unsigned char flipbit = ~(1 << 5);
+	do {
+		c1 = (unsigned char)*s1++ & flipbit;
+		c2 = (unsigned char)*s2++ & flipbit;
+		if(c1 == '\0')
+		return c1 - c2;
+	} while(c1 == c2);
+	return c1 - c2;
 }
 
 wsclient_error *libwsclient_new_error(int errcode) {
