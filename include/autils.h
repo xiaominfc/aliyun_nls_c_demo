@@ -57,5 +57,4 @@ long current_time(void);
 void build_uuid(char *uuid_str);
 
 char *current_task_id(void);
-
 #endif

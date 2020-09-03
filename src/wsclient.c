@@ -839,7 +839,7 @@ wsclient_error *libwsclient_new_error(int errcode) {
 	return err;
 }
 
-int libwsclient_send_fragment(wsclient *client, char *strdata, int len, int flags) {
+int libwsclient_send_fragment(wsclient *client, char *strdata, size_t len, int flags) {
 	wsclient_error *err = NULL;
 	struct timeval tv;
 	unsigned char mask[4];
@@ -854,10 +854,7 @@ int libwsclient_send_fragment(wsclient *client, char *strdata, int len, int flag
 	int i, sockfd;
 	unsigned int frame_size;
 	char *data = NULL;
-
-
 	sockfd = client->sockfd;
-
 
 	if(client->flags & CLIENT_SENT_CLOSE_FRAME) {
 		if(client->onerror) {
@@ -975,11 +972,9 @@ int libwsclient_send(wsclient *client, char *strdata)  {
 	unsigned int len_size;
 	//unsigned long long be_payload_len;
 	unsigned int sent = 0;
-	int i, sockfd;
+	int i;
 	unsigned int frame_size;
 	char *data;
-
-	sockfd = client->sockfd;
 
 	if(client->flags & CLIENT_SENT_CLOSE_FRAME) {
 		if(client->onerror) {

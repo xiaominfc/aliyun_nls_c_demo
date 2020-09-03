@@ -24,6 +24,10 @@ yum install libuuid-devel
 #define KEYSECRET "{your key_secret}"
 #define APPKEY "{your app_key}"
 ```
+改成你申请的
+
+
+
 
 修改 include/client.h
 
@@ -31,8 +35,6 @@ yum install libuuid-devel
 ```
 //#define DEBUG_TEST 
 ```
-
-改成你申请的
 
 ```
 make
