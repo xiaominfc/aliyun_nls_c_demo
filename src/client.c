@@ -214,6 +214,10 @@ void* test_work(void *arg) {
 
 int onnlsclose(wsclient *c) {
 	fprintf(stderr, "onclose called: %d\n", c->sockfd);
+	NLSClient *nls_client = (NLSClient *)c->user_data;
+	if(nls_client && nls_client->onclose){
+		nls_client->onclose(nls_client);
+	}
 	return 0;
 }
 
@@ -222,6 +226,10 @@ int onnlserror(wsclient *c, wsclient_error *err) {
 	if(err->extra_code) {
 		errno = err->extra_code;
 		perror("recv");
+	}
+	NLSClient *nls_client = (NLSClient *)c->user_data;
+	if(nls_client && nls_client->onerror){
+		nls_client->onerror(nls_client,err);
 	}
 	return 0;
 }
@@ -373,5 +381,13 @@ void nls_set_onmessage(NLSClient *client, int (*cb)(struct _NLSClient *c, wsclie
 	client->onmessage = cb;
 }
 
+void nls_set_onerror(NLSClient *client, int (*cb)(struct _NLSClient *c, wsclient_error *err)){
+	client->onerror = cb;
+}
+
+
+void nls_set_onclose(NLSClient *client, int (*cb)(struct _NLSClient *c)){
+	client->onclose = cb;
+}
 
 

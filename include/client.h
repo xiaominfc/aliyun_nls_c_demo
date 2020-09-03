@@ -119,4 +119,21 @@ void nls_set_onconnected(NLSClient *client, int (*cb)(struct _NLSClient *c));
  * @param [function*] cb
  */
 void nls_set_onmessage(NLSClient *client, int (*cb)(struct _NLSClient *c, wsclient_message *msg));
+
+
+/**
+ * @brief set onerror callback for nlsclient
+ * @param [NLSClient*] client
+ * @param [function*] cb
+ */
+void nls_set_onerror(NLSClient *client, int (*cb)(struct _NLSClient *c, wsclient_error *err));
+
+
+/**
+ * @brief set onclose callback for nlsclient
+ * @param [NLSClient*] client
+ * @param [function*] cb
+ */
+void nls_set_onclose(NLSClient *client, int (*cb)(struct _NLSClient *c));
+
 #endif
