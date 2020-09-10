@@ -318,6 +318,7 @@ int onnlsopen(wsclient *c) {
 	if(nls_client->type <= ALIYUN_NEW) {
 		nls_client->state = CONNECTED;
 		auth_nls(nls_client);
+		printf("auth_nls\n");
 	}else{
 		nls_client->state = TRANSFERRING;
 		if(nls_client->onconnected){
