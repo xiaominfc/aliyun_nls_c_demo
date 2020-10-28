@@ -364,14 +364,19 @@ void nlsUrlConnect(const char * url,NLSClient *nls_client) {
 	libwsclient_onerror(client, &onnlserror);
 	libwsclient_onclose(client, &onnlsclose);
 	nls_client->ws_client = client;
+
+#ifdef DEBUG_TEST
 	pthread_t write_thread;
 	pthread_create(&write_thread, NULL, work_write_thread, (void *)nls_client);
+#endif
 	libwsclient_run(client);
 }
 
 void clientClose(NLSClient* client){
-	libwsclient_close(client->ws_client);
-	client->state = CLOSED;
+	if(client && client->state == CONNECTED){
+		libwsclient_close(client->ws_client);
+		client->state = CLOSED;
+	}
 }
 
 void nls_set_onconnected(NLSClient *client, int (*cb)(struct _NLSClient *c)){
