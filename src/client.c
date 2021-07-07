@@ -255,8 +255,10 @@ int onnlsmessage2(wsclient *c, wsclient_message *msg){
 		#endif
 	}else if(nls_client->state == TRANSFERRING) {
 		int status_code = json_dotget_integer(json,"header.status");
-		// printf("%s:%d\n", "nls status_code:", status_code);
-		// printf("%s:%s\n", "nls text:", json_dotget_string(json,"payload.result"));
+		#ifdef DEBUG_TEST
+		printf("%s:%d\n", "nls status_code:", status_code);
+		printf("%s:%s\n", "nls text:", json_dotget_string(json,"payload.result"));
+		#endif
 		if(nls_client->onmessage){
 			nls_client->onmessage(nls_client,msg);
 		}
@@ -290,8 +292,10 @@ int onmessage_aliyun(wsclient *c, wsclient_message *msg) {
 		#endif
 	}else if(nls_client->state == TRANSFERRING) {
 		int status_code = json_dotget_integer(json,"result.status_code");
+		#ifdef DEBUG_TEST
 		printf("%s:%d\n", "nls status_code:", status_code);
 		printf("%s:%s\n", "nls text:", json_dotget_string(json,"result.text"));
+		#endif
 		if(status_code == 0) {
 			#ifdef DEBUG_TEST
 			printf("%s:%ld\n","send time", current_time() - start_time);	
